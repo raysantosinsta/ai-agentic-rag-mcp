@@ -21,7 +21,7 @@ Este repositório consolida as melhores práticas e frameworks exigidos por time
 ## 🏗️ Diagrama de Arquitetura
 
 ```mermaid
-flowchart TB
+graph TD
     %% Definição de Estilos (Cores e Bordas)
     classDef user fill:#3b82f6,stroke:#1d4ed8,stroke-width:2px,color:#fff,font-weight:bold
     classDef agent fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#fff,rx:10,ry:10,font-weight:bold
@@ -30,38 +30,34 @@ flowchart TB
     classDef mcp fill:#ef4444,stroke:#b91c1c,stroke-width:2px,color:#fff
     classDef eval fill:#64748b,stroke:#334155,stroke-width:2px,color:#fff,stroke-dasharray: 5 5
 
-    %% Nós Principais
+    %% Nós
     U((👤 Usuário)):::user
-    
-    subgraph Core["🧠 Core Agêntico"]
-        A{"🤖 Agente LangGraph\n(ReAct Loop)"}:::agent
-        LLM["⚡ Groq LLM\n(Llama 3 / OSS 120B)"]:::llm
-        A <==>|Planejamento & Raciocínio| LLM
+    E["⚖️ LLM-as-a-judge\n(Governança)"]:::eval
+
+    subgraph "🧠 Inteligência (Core)"
+        A{"🤖 Agente LangGraph"}:::agent
+        LLM["⚡ Groq LLM"]:::llm
     end
 
-    subgraph Tools["🛠️ Ferramentas & Fontes de Verdade"]
-        direction LR
-        RAG[/"📚 RAG Retriever\n(HuggingFace)"/]:::db
-        DB[("🗄️ PostgreSQL\n(pgvector)")]:::db
-        MCP["🔌 Servidor MCP\n(Ferramentas Externas)"]:::mcp
-        
-        RAG <--> DB
-    end
-    
-    subgraph Evals["✅ Governança & Qualidade"]
-        E["⚖️ LLM-as-a-judge\n(Avaliador)"]:::eval
+    subgraph "🛠️ Ferramentas & Fontes"
+        RAG[/"📚 Banco Vetorial\n(pgvector)"/]:::db
+        MCP["🔌 Servidor MCP\n(APIs Internas)"]:::mcp
     end
 
-    %% Fluxo de Execução
-    U -->|1. Envia Pergunta| A
-    A -->|2. Busca Políticas| RAG
-    RAG -.->|3. Contexto Vetorial| A
-    A -->|4. Consulta API Externa| MCP
-    MCP -.->|5. Retorna Dados| A
-    A -->|6. Resposta Final| U
-    
-    %% Fluxo de Avaliação
-    A -.->|7. Amostragem de Logs| E
+    %% Conexões com o Usuário
+    U -->|1. Pergunta| A
+    A -->|6. Resposta| U
+
+    %% Conexões Internas do Agente
+    A <-->|Ciclo ReAct| LLM
+    A <-->|7. Evals| E
+
+    %% Conexões com as Ferramentas (Simétricas)
+    A -->|2. Consulta RAG| RAG
+    RAG -.->|3. Textos| A
+
+    A -->|4. Consulta MCP| MCP
+    MCP -.->|5. JSON| A
 ```
 
 ## 🚀 Como Executar Localmente

@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  pgvector:
+    # Usando a imagem oficial do pgvector que já traz o PostgreSQL com a extensão instalada
+    image: ankane/pgvector:latest
+    container_name: agentforge_pgvector
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
+      POSTGRES_DB: ${POSTGRES_DB:-agentforge}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgvector_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  pgvector_data:
